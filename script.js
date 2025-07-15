@@ -1,6 +1,5 @@
 const canvas = document.querySelector("canvas");
 const context = canvas.getContext('2d');
-console.log(canvas);
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
@@ -16,7 +15,6 @@ class Boundary {
     draw() {
         context.fillStyle = 'blue';
         context.fillRect(this.position.x, this.position.y, this.width, this.height);
-
     }
 }
 
@@ -29,10 +27,16 @@ class Player {
 
     draw() {
         context.beginPath();
-        context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI*2);
+        context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
         context.fillStyle = 'yellow';
         context.fill();
         context.closePath();
+    }
+
+    update() {
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+        this.draw();
     }
 }
 
@@ -42,7 +46,7 @@ const map = [
     ['-',' ','-','-',' ','-'],
     ['-',' ',' ',' ',' ','-'],
     ['-','-','-','-','-','-']
-]
+];
 
 const boundaries = [];
 const player = new Player({
@@ -63,19 +67,52 @@ map.forEach((row, i) => {
                 boundaries.push(
                     new Boundary({
                         position: {
-                            x: j*Boundary.width,
-                            y: i*Boundary.height
+                            x: j * Boundary.width,
+                            y: i * Boundary.height
                         }
                     })
-                )
+                );
                 break;
         }
-    })
+    });
 });
 
-boundaries.forEach( (block) => {
-    block.draw(); 
-})  
+function animate() {
+    requestAnimationFrame(animate);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    boundaries.forEach((block) => {
+        block.draw();
+    });
+    player.update();
+}
+animate();
 
-player.draw();
+addEventListener('keydown', ({key}) => {
+    switch (key) {
+        case 'w':
+            player.velocity.y = -5;
+            break;
+        case 's':
+            player.velocity.y = 5;
+            break;
+        case 'a':
+            player.velocity.x = -5;
+            break;
+        case 'd':
+            player.velocity.x = 5;
+            break;
+    }
+});
 
+addEventListener('keyup', ({key}) => {
+    switch (key) {
+        case 'w':
+        case 's':
+            player.velocity.y = 0;
+            break;
+        case 'a':
+        case 'd':
+            player.velocity.x = 0;
+            break;
+    }
+});
